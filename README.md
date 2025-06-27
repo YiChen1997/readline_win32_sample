@@ -16,7 +16,7 @@ The sample code in this repo is based on my experience with using Readline in th
 
 You'll need the following:
 - [git](https://git-scm.com/downloads), to clone the repo and apply a patch and other source control operations.
-- [Premake](https://premake.github.io/), to create project files for building using your preferred compiler.
+- [CMake](https://cmake.org/), to create project files for building using your preferred compiler.
 - A C/C++ compiler such as Visual Studio or MinGW.
 - Familiarity with [codepages](https://learn.microsoft.com/en-us/windows/win32/intl/code-pages), Active Code Page, UTF8, and -`A` ("ANSI") versus -`W` ("Wide") APIs on Windows.
 - Windows 8.1 or higher, for native terminal support.
@@ -27,13 +27,8 @@ You'll need the following:
 First you'll need to set up the local repo:
 
 ```cmd
-:: Optional: create a parent directory.
-:: Otherwise: change to the directory under which you want to clone the repo.
-md c:\repos
-cd /d c:\repos
-
-:: Clone the repo.
-git clone --recurse-submodules https://github.com/chrisant996/readline_win32_sample.git
+# Clone the repo.
+git clone --recurse-submodules https://github.com/YiChen1997/readline_win32_sample.git
 cd readline_win32_sample
 ```
 
@@ -60,11 +55,12 @@ The repo root contains the sample program, license file, Premake script, and REA
 First, run Premake to generate project files for your compiler.  Refer to the Premake documentation for help, if needed.
 
 ```cmd
-:: Generate project files for use with VS2019.
-premake5 vs2019
+# Generate project files for use with VS2022.
+mkdir build-win && cd build-win
+cmake .. -G "Visual Studio 17 2022"
+cmake --build .
 ```
 
-Next, invoke your compiler to build using the generated project files.  For example, with Visual Studio you could open the `.build/vs2019/sample.sln` file and then press <kbd>F5</kbd> to build and run the sample.
 
 ## Input mode
 
