@@ -1,0 +1,53 @@
+# ================ 核心规则 ================
+# 所有文本文件自动标准化为 LF，提交时转换为 LF，检出时按系统转换
+* text=auto
+
+# 强制文本文件在仓库中存储为 LF（跨平台统一）
+*.txt text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.xml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.sh text eol=lf
+*.c text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.cs text eol=lf
+*.sql text eol=lf
+
+# ================ 平台特定规则 ================
+# Windows 批处理文件保留 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=lf  # PowerShell 推荐 LF
+
+# ================ 二进制文件（禁止修改） ================
+# 显式标记二进制文件（Git 不会尝试转换换行符）
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.lib binary
+*.jar binary
+
+# ================ 开发工具配置 ================
+# Git 相关文件
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+
+# ================ 特殊处理 ================
+# 确保 Shell 脚本可执行（Linux/macOS）
+*.sh text eol=lf
+*.sh executable
+
+# 避免 Windows 对 Linux 符号链接的干扰
+*.symlink binary

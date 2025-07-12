@@ -1,1 +1,100 @@
+# 忽略操作系统生成的文件
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# 忽略日志文件和临时文件
+*.log
+*.tmp
+*.bak
+*.old
+*.orig
+*.rej
+
+# 忽略 IDE 和编辑器的配置文件
+.vscode/
+.idea/
+*.sublime-*
+*.code-workspace
+build
 .build
+build-win
+out
+.vs
+
+# 忽略 node.js 项目依赖
+node_modules/
+
+# 忽略 Python 缓存文件
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 忽略编译输出
+/dist
+/build
+/out
+/bin
+/obj
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.class
+*.jar
+
+# 忽略版本控制工具的临时文件
+*.patch
+*.diff
+*.orig
+*.merge_backup
+
+# 忽略环境配置文件（如包含密码的）
+.env
+.env.*
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+# 忽略测试覆盖率和调试文件
+coverage/
+.nyc_output/
+*.prof
+*.gcda
+*.gcno
+
+# 忽略打包工具的缓存
+.npm/
+.pnpm-debug.log
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+
+# 忽略 macOS Finder 资源文件
+.AppleDouble
+.LSOverride
+Icon?
+
+# Git子模块的未初始化目录（如果不用，可以去掉）
+**/.gitmodules
+
+# 忽略生成的文档
+/docs/_build/
+*.pdf
+
+# 忽略数据库或数据导出
+*.sqlite3
+*.db
+*.sql
+
+# 可选：忽略压缩包
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.rar
