@@ -21,6 +21,8 @@
 #define true                    (1)
 #define false                   (0)
 
+extern enum TargetEncode encode = UTF8;
+
 static char s_verbose_input = false;
 void set_verbose_input(int verbose)
 {
@@ -249,9 +251,9 @@ static const wchar_t* key_name_from_vk(int key_vk, int scan)
 
 static void verbose_input(const KEY_EVENT_RECORD* record)
 {
-    int key_char = record->uChar.UnicodeChar;
-    int key_vk = record->wVirtualKeyCode;
-    int key_sc = record->wVirtualScanCode;
+    int key_char  = record->uChar.UnicodeChar;
+    int key_vk    = record->wVirtualKeyCode;
+    int key_sc    = record->wVirtualScanCode;
     int key_flags = record->dwControlKeyState;
 
     const wchar_t* key_name = key_name_from_vk(key_vk, key_sc);
@@ -333,7 +335,8 @@ static void input_push_wchar(unsigned int value)
     assert(s_term.m_initialized);
 
     int index = s_term.m_buffer_head + s_term.m_buffer_count;
-    wchar_t wc[3];
+    wchar_t wc[8] = {L'\0'};
+    // wchar_t *wc = (wchar_t *)malloc(8 * sizeof(wchar_t)); // 初始分配20字节
     unsigned int len = 0;
     char utf8[sizeof(s_term.m_buffer)];
 
@@ -363,9 +366,10 @@ static void input_push_wchar(unsigned int value)
         s_term.m_lead_surrogate = 0;
     }
     wc[len++] = (wchar_t)value;
-    wc[len] = 0;
 
-    unsigned int n = WideCharToMultiByte(CP_UTF8, 0, wc, len, utf8, sizeof(utf8), NULL, NULL);
+    int required_size = WideCharToMultiByte(encode, 0, wc, len, NULL, 0, NULL, NULL);
+    printf("<%d>", required_size);
+    unsigned int n = WideCharToMultiByte(encode, 0, wc, -1, utf8, sizeof(utf8), NULL, NULL);
     for (unsigned int i = 0; i < n; ++i, ++index)
     {
         assert(s_term.m_buffer_count < sizeof(s_term.m_buffer));
@@ -530,17 +534,17 @@ static void vt_emulation(int key_char, int key_vk, int key_sc, int key_flags)
     const char* const* seqs = NULL;
     switch (key_vk)
     {
-    case VK_UP:     seqs = kcuu1; break;    // up
-    case VK_DOWN:   seqs = kcud1; break;    // down
-    case VK_LEFT:   seqs = kcub1; break;    // left
-    case VK_RIGHT:  seqs = kcuf1; break;    // right
-    case VK_HOME:   seqs = khome; break;    // insert
-    case VK_END:    seqs = kend; break;     // delete
-    case VK_INSERT: seqs = kich1; break;    // home
-    case VK_DELETE: seqs = kdch1; break;    // end
-    case VK_PRIOR:  seqs = kpp; break;      // pgup
-    case VK_NEXT:   seqs = knp; break;      // pgdn
-    case VK_BACK:   seqs = kbks; break;     // bkspc
+        case VK_UP:     seqs = kcuu1; break;    // up
+        case VK_DOWN:   seqs = kcud1; break;    // down
+        case VK_LEFT:   seqs = kcub1; break;    // left
+        case VK_RIGHT:  seqs = kcuf1; break;    // right
+        case VK_HOME:   seqs = khome; break;    // insert
+        case VK_END:    seqs = kend;  break;    // delete
+        case VK_INSERT: seqs = kich1; break;    // home
+        case VK_DELETE: seqs = kdch1; break;    // end
+        case VK_PRIOR:  seqs = kpp;   break;    // pgup
+        case VK_NEXT:   seqs = knp;   break;    // pgdn
+        case VK_BACK:   seqs = kbks;  break;    // bkspc
     }
     if (seqs)
     {
@@ -652,9 +656,9 @@ static void process_input(const KEY_EVENT_RECORD* record)
 {
     assert(s_term.m_initialized);
 
-    int key_char = record->uChar.UnicodeChar;
-    int key_vk = record->wVirtualKeyCode;
-    int key_sc = record->wVirtualScanCode;
+    int key_char  = record->uChar.UnicodeChar;
+    int key_vk    = record->wVirtualKeyCode;
+    int key_sc    = record->wVirtualScanCode;
     int key_flags = record->dwControlKeyState;
 
     // Only respond to key down events.
@@ -709,6 +713,7 @@ static int read_console(DWORD _timeout, int peek)
     assert(s_term.m_initialized);
     int ret = true;
 
+    // TODO 删除
     // Hide the cursor unless we're accepting input so we don't have to see it
     // jump around as the screen's drawn.
     if (!peek)
@@ -765,11 +770,12 @@ static int read_console(DWORD _timeout, int peek)
 
         switch (record.EventType)
         {
-        case KEY_EVENT:
-            process_input(&record.Event.KeyEvent);
-            break;
-
-        case WINDOW_BUFFER_SIZE_EVENT:
+            case KEY_EVENT:
+            {
+                process_input(&record.Event.KeyEvent);
+                break;
+            }
+            case WINDOW_BUFFER_SIZE_EVENT:
             {
                 unsigned int newdim = get_dimensions();
                 if (newdim != s_term.m_dimensions)
@@ -777,13 +783,13 @@ static int read_console(DWORD _timeout, int peek)
                     s_term.m_dimensions = newdim;
                     rl_resize_terminal();
                 }
+                break;
             }
-            break;
         }
 
         // Eat records that don't result in available input.
-        if (peek && buffer_count == s_term.m_buffer_count)
-            ReadConsoleInputW(s_term.m_stdin, &record, 1, &count);
+        // if (peek && buffer_count == s_term.m_buffer_count)
+        //     ReadConsoleInputW(s_term.m_stdin, &record, 1, &count);
     }
 
 out:
@@ -824,6 +830,9 @@ int config_console(void)
     outmode = s_term.m_prevmodeout;
 
     inmode &= ~(ENABLE_PROCESSED_INPUT|ENABLE_LINE_INPUT|ENABLE_ECHO_INPUT|ENABLE_MOUSE_INPUT);
+    //SetConsoleMode(_el_h_in, ENABLE_PROCESSED_INPUT
+    //    | ENABLE_EXTENDED_FLAGS | ENABLE_INSERT_MODE
+    //    | ENABLE_QUICK_EDIT_MODE);
 #ifdef FORCE_WIN10_16299_VT_INPUT
     inmode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
 #endif

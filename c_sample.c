@@ -24,7 +24,7 @@ static BOOL WINAPI ctrlevent_handler(DWORD ctrl_type)
 
 static void fix_stdin_to_binary(void)
 {
-    setmode(0/*stdin*/, O_BINARY);
+     setmode(0/*stdin*/, O_BINARY);
 }
 
 int main(int argc, char **argv)
@@ -49,6 +49,8 @@ int main(int argc, char **argv)
     // Set the locale to UTF8.  This is needed so that UTF8 input can work
     // properly in Readline.
     setlocale(LC_ALL, ".utf8");
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
 
     // Fix stdin to use binary mode so Enter (Ctrl-M) can be read as input.
     fix_stdin_to_binary();
@@ -67,6 +69,20 @@ int main(int argc, char **argv)
         // If the input is "exit" then break out of the input loop.
         if (strcmp(input, "exit") == 0)
             break;
+        if (strcmp(input, "gbk") == 0)
+        {
+            encode = ASCII;
+            setlocale(LC_ALL, "");
+            SetConsoleCP(936);
+            SetConsoleOutputCP(936);
+        }
+        if (strcmp(input, "utf8") == 0)
+        {
+            encode = UTF8;
+            setlocale(LC_ALL, ".utf8");
+            SetConsoleCP(CP_UTF8);
+            SetConsoleOutputCP(CP_UTF8);
+        }
 
         // Add the input to the history list.
         add_history(input);
@@ -81,7 +97,8 @@ int main(int argc, char **argv)
     // needed.  If it uses some other codepage, then a different value may be
     // required here.
     setlocale(LC_ALL, "");
-
+    SetConsoleCP(936);
+    SetConsoleOutputCP(936);
     unconfig_console();
     return 0;
 }
