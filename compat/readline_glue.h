@@ -98,3 +98,11 @@ typedef int wcwidth_t (char32_t);
 typedef int wcswidth_t (const char32_t*, size_t);
 extern wcwidth_t *wcwidth;
 extern wcswidth_t *wcswidth;
+
+enum TargetEncode
+{
+	ASCII = 936,
+	UTF8 = 65001
+};
+
+extern enum TargetEncode encode;
