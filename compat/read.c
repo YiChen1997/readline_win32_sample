@@ -367,8 +367,8 @@ static void input_push_wchar(unsigned int value)
     }
     wc[len++] = (wchar_t)value;
 
-    int required_size = WideCharToMultiByte(encode, 0, wc, len, NULL, 0, NULL, NULL);
-    printf("<%d>", required_size);
+    // int required_size = WideCharToMultiByte(encode, 0, wc, len, NULL, 0, NULL, NULL);
+    // printf("<%d>", required_size);
     unsigned int n = WideCharToMultiByte(encode, 0, wc, -1, utf8, sizeof(utf8), NULL, NULL);
     for (unsigned int i = 0; i < n; ++i, ++index)
     {
@@ -388,9 +388,25 @@ static unsigned char input_pop()
     if (!s_term.m_buffer_count)
         return input_none_byte;
 
+    // 从缓冲区的头部位置读取一个字节的数据
     unsigned char value = s_term.m_buffer[s_term.m_buffer_head];
 
+    // 减少缓冲区中的数据计数
     --s_term.m_buffer_count;
+
+    /**
+     * @brief 将头部指针向前移动一位，使用位运算实现循环缓冲区的效果
+     * 
+     * @note
+     * 使用位运算来实现循环缓冲区：
+     * sizeof(s_term.m_buffer) - 1 的值是 15（因为缓冲区大小是 16）
+     * 15 的二进制表示是 1111
+     * 通过与运算 & 1111，确保索引值在 0-15 范围内循环
+     * 例如：
+     *
+     * 如果当前头部是 15，加 1 后变成 16，16 & 15 = 0，回到缓冲区开始
+     * 如果当前头部是 7，加 1 后变成 8，8 & 15 = 8，正常前进
+     */
     s_term.m_buffer_head = (s_term.m_buffer_head + 1) & (sizeof(s_term.m_buffer) - 1);
 
     return value;
